@@ -148,7 +148,9 @@ class Distro(distros.Distro):
             # so lets see if we can read it first.
             conf = self._read_hostname_conf(filename)
         except IOError:
-            pass
+            # Don't create /etc/hostname if it doesn't
+            # already exist
+            return
         if not conf:
             conf = HostnameConf("")
         conf.set_hostname(hostname)

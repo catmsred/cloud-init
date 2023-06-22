@@ -45,6 +45,7 @@ class TestHostname(t_help.FilesystemMockingTestCase):
         ds = None
         cc = cloud.Cloud(ds, paths, {}, distro, None)
         self.patchUtils(self.tmp)
+        util.ensure_file("/etc/hostname")
         cc_set_hostname.handle("cc_set_hostname", cfg, cc, [])
         contents = util.load_file("/etc/hostname")
         self.assertEqual("blah.yahoo.com", contents.strip())
@@ -89,8 +90,23 @@ class TestHostname(t_help.FilesystemMockingTestCase):
         ds = None
         cc = cloud.Cloud(ds, paths, {}, distro, None)
         self.patchUtils(self.tmp)
+        util.ensure_file("/etc/hostname")
         cc_set_hostname.handle("cc_set_hostname", cfg, cc, [])
         contents = util.load_file("/etc/hostname")
+        self.assertEqual("blah", contents.strip())
+
+    def test_transient_hostname_debian(self):
+        cfg = {
+            "hostname": "blah",
+            "fqdn": "blah.blah.blah.yahoo.com",
+        }
+        distro = self._fetch_distro("debian")
+        paths = helpers.Paths({"cloud_dir": self.tmp})
+        ds = None
+        cc = cloud.Cloud(ds, paths, {}, distro, None)
+        self.patchUtils(self.tmp)
+        cc_set_hostname.handle("cc_set_hostname", cfg, cc, [])
+        contents = util.get_hostname()
         self.assertEqual("blah", contents.strip())
 
     @mock.patch("cloudinit.distros.Distro.uses_systemd", return_value=False)
@@ -163,6 +179,7 @@ class TestHostname(t_help.FilesystemMockingTestCase):
         ds = None
         cc = cloud.Cloud(ds, paths, {}, distro, None)
         self.patchUtils(self.tmp)
+        util.ensure_file("/etc/hostname")
         cc_set_hostname.handle(
             "cc_set_hostname", {"hostname": "hostname1.me.com"}, cc, []
         )
@@ -253,6 +270,7 @@ class TestHostname(t_help.FilesystemMockingTestCase):
         ds = None
         cc = cloud.Cloud(ds, paths, {}, distro, None)
         self.patchUtils(self.tmp)
+        util.ensure_file("/etc/hostname")
         prev_fn = Path(cc.get_cpath("data")) / "set-hostname"
         prev_fn.touch()
         cc_set_hostname.handle("cc_set_hostname", cfg, cc, [])
