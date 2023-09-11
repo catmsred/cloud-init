@@ -193,6 +193,13 @@ def handle(name: str, cfg: Config, cloud: Cloud, args: list) -> None:
         )
         return
 
+    try:
+        subp.subp(["snap", "wait", "system", "seed.loaded"])
+    except subp.ProcessExecutionError as e:
+        raise RuntimeError(
+            "Failed to wait for snap to finish seeding: %s" % e
+        ) from e
+
     add_assertions(
         cfgin.get("assertions", []),
         os.path.join(cloud.paths.get_ipath_cur(), "snapd.assertions"),

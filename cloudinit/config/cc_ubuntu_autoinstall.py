@@ -83,6 +83,13 @@ def handle(name: str, cfg: Config, cloud: Cloud, args: list) -> None:
         )
         return
 
+    try:
+        subp.subp(["snap", "wait", "system", "seed.loaded"])
+    except subp.ProcessExecutionError as e:
+        raise RuntimeError(
+            "Failed to wait for snap to finish seeding: %s" % e
+        ) from e
+
     snap_list, _ = subp(["snap", "list"])
     installer_present = None
     for snap_name in LIVE_INSTALLER_SNAPS:

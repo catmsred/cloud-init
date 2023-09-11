@@ -216,6 +216,13 @@ def handle(name: str, cfg: Config, cloud: Cloud, args: list) -> None:
     bridge_cfg = lxd_cfg.get("bridge", {})
     supplemental_schema_validation(init_cfg, bridge_cfg, preseed_str)
 
+    try:
+        subp.subp(["snap", "wait", "system", "seed.loaded"])
+    except subp.ProcessExecutionError as e:
+        raise RuntimeError(
+            "Failed to wait for snap to finish seeding: %s" % e
+        ) from e
+
     if not subp.which("lxd"):
         try:
             subp.subp(["snap", "install", "lxd"])
